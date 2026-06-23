@@ -36,3 +36,8 @@ build/
 .properties
 
 test_output.txt
+.env
+/application-variables.properties
+.properties
+application-dev.properties
+application-prod.properties
