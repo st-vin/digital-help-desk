@@ -2,12 +2,14 @@ package com.mku.helpdesk.service;
 
 import com.mku.helpdesk.dto.TicketRequest;
 import com.mku.helpdesk.dto.TicketResponse;
+import com.mku.helpdesk.event.TicketStatusChangedEvent;
 import com.mku.helpdesk.exception.ResourceNotFoundException;
 import com.mku.helpdesk.model.*;
 import com.mku.helpdesk.repository.CategoryRepository;
 import com.mku.helpdesk.repository.TicketHistoryRepository;
 import com.mku.helpdesk.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final CategoryRepository categoryRepository;
     private final TicketHistoryRepository ticketHistoryRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     // ===================== STUDENT-FACING =====================
 
@@ -81,6 +84,7 @@ public class TicketService {
         ticket.setStatus(Status.CLOSED);
         ticket.setUpdatedAt(LocalDateTime.now());
         logHistory(ticket, student, "status", oldStatus, Status.CLOSED.name());
+        publishStatusChangedEvent(ticket, oldStatus, Status.CLOSED.name(), student);
 
         return toResponse(ticket);
     }
@@ -133,6 +137,7 @@ public class TicketService {
         }
 
         logHistory(ticket, staff, "status", oldStatus, newStatus.name());
+        publishStatusChangedEvent(ticket, oldStatus, newStatus.name(), staff);
 
         // NOTE: this is exactly where NotificationService.sendStatusUpdate()
         // gets called once we build it in Phase 4 — deliberately not wired
@@ -211,6 +216,18 @@ public class TicketService {
         history.setOldValue(oldValue);
         history.setNewValue(newValue);
         ticketHistoryRepository.save(history);
+    }
+
+    private void publishStatusChangedEvent(Ticket ticket, String oldStatus, String newStatus, User changedBy) {
+        applicationEventPublisher.publishEvent(new TicketStatusChangedEvent(
+                ticket.getId(),
+                ticket.getTitle(),
+                ticket.getStudent().getEmail(),
+                ticket.getStudent().getFullName(),
+                oldStatus,
+                newStatus,
+                changedBy.getFullName()
+        ));
     }
 
     private TicketResponse toResponse(Ticket t) {

@@ -25,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPasswordHash(),
-                user.isActive(),
+                user.isActive() && user.isEmailVerified(),
                 true,
                 true,
                 true,
