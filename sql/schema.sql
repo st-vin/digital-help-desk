@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS users (
     student_number  VARCHAR(20) UNIQUE,
     full_name       VARCHAR(100) NOT NULL,
     email           VARCHAR(150) NOT NULL UNIQUE,
+    email_verified  BOOLEAN NOT NULL DEFAULT FALSE,
+    verified_at     DATETIME NULL,
     password_hash   VARCHAR(255) NOT NULL,
     role            ENUM('STUDENT','ICT_STAFF','ADMIN') NOT NULL DEFAULT 'STUDENT',
     active          BOOLEAN NOT NULL DEFAULT TRUE,
@@ -82,6 +84,18 @@ CREATE TABLE IF NOT EXISTS ticket_history (
         REFERENCES tickets(id) ON DELETE CASCADE,
     CONSTRAINT fk_history_changed_by FOREIGN KEY (changed_by)
         REFERENCES users(id) ON DELETE RESTRICT
+);
+
+-- 6. Create Email Verification Tokens Table
+CREATE TABLE IF NOT EXISTS email_verification_tokens (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token       VARCHAR(100) NOT NULL UNIQUE,
+    user_id     BIGINT NOT NULL,
+    expires_at  DATETIME NOT NULL,
+    used_at     DATETIME NULL,
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_email_verification_user FOREIGN KEY (user_id)
+        REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Seed categories — needed before you can submit any ticket via the API.

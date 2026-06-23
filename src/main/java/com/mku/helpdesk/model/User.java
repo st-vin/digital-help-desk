@@ -40,6 +40,12 @@ public class User {
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
+
+    @Column(name = "verified_at")
+    private LocalDateTime verifiedAt;
+
     // Always a BCrypt hash, never plaintext. See AuthService when we build it —
     // passwordEncoder.encode() happens there, not here.
     @Column(name = "password_hash", nullable = false)
