@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -33,10 +34,12 @@ public class AdminService {
         }
 
         User staff = new User();
-        staff.setFullName(request.getFullName());
-        staff.setEmail(request.getEmail());
+        staff.setFullName(request.getFullName().trim());
+        staff.setEmail(request.getEmail().trim().toLowerCase());
         staff.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         staff.setRole(Role.ICT_STAFF);
+        staff.setEmailVerified(true);
+        staff.setVerifiedAt(LocalDateTime.now());
         staff = userRepository.save(staff);
 
         return toUserResponse(staff);

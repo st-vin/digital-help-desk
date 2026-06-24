@@ -3,6 +3,7 @@ package com.mku.helpdesk.controller;
 import com.mku.helpdesk.dto.LoginRequest;
 import com.mku.helpdesk.dto.LoginResponse;
 import com.mku.helpdesk.dto.RegisterRequest;
+import com.mku.helpdesk.dto.ResendVerificationRequest;
 import com.mku.helpdesk.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,17 +24,23 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Map.of("message", "Account created successfully. You can now log in."));
+                .body(Map.of("message", "Account created successfully. Check your email to verify your account before logging in."));
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        try {
-            System.out.println("Login endpoint hit for: " + request.getEmail());
         return ResponseEntity.ok(authService.login(request));
-        } catch (Throwable t) {
-            t.printStackTrace();
-            throw t;
-        }
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<Map<String, String>> verifyEmail(@RequestParam String token) {
+        authService.verifyEmail(token);
+        return ResponseEntity.ok(Map.of("message", "Email verified successfully. You can now log in."));
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Map<String, String>> resendVerification(@Valid @RequestBody ResendVerificationRequest request) {
+        authService.resendVerification(request);
+        return ResponseEntity.ok(Map.of("message", "If an unverified account exists for that email, a new verification link has been sent."));
     }
 }

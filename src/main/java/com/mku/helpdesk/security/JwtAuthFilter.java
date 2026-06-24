@@ -83,7 +83,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 User user = userRepository.findByEmail(email).orElse(null);
 
-                if (user != null && user.isActive()) {
+                if (user != null && user.isActive() && user.isEmailVerified()) {
                     // THE "ROLE_" PREFIX GOTCHA: Spring Security's hasRole("ADMIN")
                     // actually checks for an authority literally named "ROLE_ADMIN".
                     // If you build the authority as just "ADMIN" here, hasRole()

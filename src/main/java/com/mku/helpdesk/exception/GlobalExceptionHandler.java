@@ -59,6 +59,20 @@ public class GlobalExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<Map<String, Object>> handleEmailNotVerified(EmailNotVerifiedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody(
+                HttpStatus.FORBIDDEN, ex.getMessage(), null
+        ));
+    }
+
+    @ExceptionHandler(VerificationException.class)
+    public ResponseEntity<Map<String, Object>> handleVerification(VerificationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody(
+                HttpStatus.BAD_REQUEST, ex.getMessage(), null
+        ));
+    }
+
     // Thrown by TicketService/CommentService ownership checks (e.g. a
     // student trying to access another student's ticket — see TC-009).
     @ExceptionHandler(AccessDeniedException.class)
